@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}  Feed {% endblock %}
+
+{% block content %}
+<div class="container">
+<div class="row">
+<div class="col-sm-9">
+<div align = "center">
+<h2>{{ username }}'s profile</h2> <br>
+    {% for post in posts %}
+    {% if post.user_name == username %}
+<div class="card">
+    <h5 class="card-header" >
+        <div>
+        <div align="left">
+        <a href="/show-{{post.user_name}}">{{post.user_name}} </a>
+        </div>
+        <div align="right">
+            {% if user.getName() in post.likes %}
+            {% set like="unlike" %}
+            {% set handle="delete" %}
+            {% else %}
+            {% set like="like" %}
+            {% set handle="add" %}
+            {% endif %}
+            Likes = {{post.likes | length }}
+            <a href="/{{handle}}-like/{{user.getName()}}/{{post._id}}">
+                {{like}}
+            </a>
+        </div>
+    </div>
+    </h5>
+    <div class="card-body">
+      <p class="card-text">{{post.text}}</p>
+    </div>
+    <h5 class="card-header" > Comments </h5>
+    <div class="card-body">
+        {% if post.comments | length > 0 %}
+
+        <p>
+            <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+              Show comments ({{post.comments | length}})
+            </a>
+          </p>
+          <div class="collapse" id="collapseExample">
+            <div class="card card-body">
+                {% for comm_id in post.comments %}
+                {% set com = comments[comm_id] %}
+                {% if com %}
+                <div class="d-flex justify-content-between align-items-center">
+                    {{com["text"]}}   
+                    {% if com["username"] == user.getName() %}
+                    <a href="/delete-comment/{{comm_id}}/{{post._id}}">
+                    <button class="btn btn-danger">Delete</button>
+                    </a>
+                    {% endif %}
+                    <a href="/show-{{com['username']}}">{{com["username"]}} </a>
+                </div>
+                {% endif %}
+            {% endfor %}
+            </div>
+          </div>
+        {%else %}
+        <font style="color:lightblue"> <h3>No comments</h2> </font>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <form method="POST">
+        <textarea   id="comment" name="comment" placeholder="Add comment" cols="50"></textarea> <br>
+        <input type="hidden" id="hidden" name="hidden" value="{{user.getName()}},{{post._id}}">
+            <button type="submit" class="btn btn-primary">
+            Add
+        </button>
+        </form>
+      </div>
+  </div> <br>
+  {% endif %}
+  {% endfor %}
+</div>
+</div>
+<div class="col-sm-2 offset-sm-1" align="center">
+<h2>Friends</h2>
+{% if username!= user.getName() %}
+    {% if not friends or user.getName() not in friends %}
+        <a href="/make-friends/{{username}}/{{user.getName()}}"><button class="btn btn-info">Add friend</button></a> <br>
+    {% else %}
+        <button class="btn btn-success">FRIENDS</button> <br>
+    {% endif %}
+{% endif %}
+<a href="/show-friends/{{username}}"> <button class="btn btn-dark">Show friends</button> </a>
+
+</div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %} Search {% endblock %}
+{% block content %} 
+<style>
+    label {
+        display: block;
+        font: 1rem 'Fira Sans', sans-serif;
+    }
+    
+    input,
+    label {
+        margin: .4rem 0;
+    }
+</style>
+<form method="POST">
+
+    <label for="search"><b>Search the user</b><i>(Best results for your search query will be shown):</i></label>
+    <input type="search" id="search" name="search" placeholder="Username">
+    &nbsp;&nbsp;
+    <button class="btn btn-info" type="submit">Search</button>
+    <br>
+    {% if search %}
+    <h2>Search result:</h2>
+    <ul>
+        {% for name in search %}
+        {% if name %}
+        <li>
+            <a href="/show-{{name}}"> {{name}} </a>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+    {% endif %}
+</form>
+
+{% endblock %}

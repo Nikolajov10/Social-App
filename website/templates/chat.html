@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %} Chat {% endblock %}
+
+{% block content %}
+<style>
+    .my-custom-scrollbar {
+        position: relative;
+        height: 200px;
+        overflow: auto;
+        }
+        .table-wrapper-scroll-y {
+        display: block;
+        }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script type="text/javascript" charset="utf-8">
+  $(document).ready(function() {
+    var address = "http://127.0.0.1:5000/";
+    var socket = io.connect(address);
+    socket.on('connect', function() {
+    socket.send('User has connected!');
+  });
+
+  socket.on('message', function(msg) {
+    console.log("Received message");
+    if (msg.receiver=="{{user.getName()}}") {
+      $("#chat-content").append('<div class="media media-chat media-chat-reverse">\
+        <div class="media-body">\
+            <p>'+msg.text + '</p>\
+            <p class="meta">\
+              <font style="color:lightslategray">\
+              <time>' + msg.time + '</time>\
+            </font></p>\
+        </div></div>');
+    }
+  });
+
+  $('#send_button').on('click', function() {
+    today = new Date();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+      socket.emit("send",{
+        'text':$('#msg').val(),
+        "sender":"{{user.getName()}}",
+        "receiver":"{{friend}}",
+        "time":time
+      });
+      $('#msg').val('');
+    });
+  });
+</script>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3" align="left">
+                <h3></h3>
+                <div class="table-wrapper-scroll-y my-custom-scrollbar">
+                    <table class="table table-bordered table-striped mb-0">
+                      <thead>
+                        <tr>
+                          <th scope="col">Friends</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                          {% for friend in friends %}
+                        <tr>
+                          <td><a href="/chat/{{friend}}">{{friend}}</a></td>              
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+            </div>
+            <div class="col-sm-6 offset-sm-2">
+                <h3>{{user.getName()}}'s chat {% if friend %} with {{friend}}  {% endif %} </h3>
+                <div class="page-content page-container" id="page-content">
+                  <div class="padding">
+                      <div class="row container d-flex justify-content-center">
+                          <div class="col-sm-12">
+                              <div class="card card-bordered">
+                                  <div class="card-header">
+                                      <h4 class="card-title"><strong>Chat</strong></h4>
+                                  </div>
+                                  <div class="ps-container ps-theme-default ps-active-y" id="chat-content" style="overflow-y: scroll !important; height:400px !important;">
+                                    {% for msg in messages %}
+                                  {% if msg["sender"] != user.getName() %}
+                                      <div class="media media-chat"> <img class="avatar" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="...">
+                                          <div class="media-body">
+                                              <p>{{msg["text"]}}</p>
+                                              <p class="meta">
+                                                <font style="color:lightslategray">
+                                                <time >{{msg["time"]}}</time>
+                                              </font></p>
+                                          </div>
+                                      </div>
+                                      {% else %}
+                                      <div class="media media-chat media-chat-reverse">
+                                          <div class="media-body">
+                                              <p>{{msg["text"]}}</p>
+                                              <p class="meta">
+                                                <font style="color:lightslategray">
+                                                <time>{{msg["time"]}}</time>
+                                              </font></p>
+                                          </div>
+                                      </div>
+                                      {% endif %}
+                                  {% endfor %}
+                                      <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 0px;">
+                                          <div class="ps-scrollbar-x" tabindex="0" style="left: 0px; width: 0px;"></div>
+                                      </div>
+                                      <div class="ps-scrollbar-y-rail" style="top: 0px; height: 0px; right: 2px;">
+                                          <div class="ps-scrollbar-y" tabindex="0" style="top: 0px; height: 2px;"></div>
+                                      </div>
+                                      
+                                  </div>
+                                  <div class="publisher bt-1 border-light"> <img class="avatar avatar-xs" src="https://img.icons8.com/color/36/000000/administrator-male.png" alt="..."> 
+                                    <form method="POST">
+                                    <input id="msg" class="publisher-input" type="text" placeholder="Write something" rows="3" cols="40"> <br>
+                                    <button class="btn btn-info" type="submit" id="send_button">Send</button>
+                                  </form>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

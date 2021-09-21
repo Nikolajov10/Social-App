@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Feed{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+  <div class="col-sm-8">
+<div align = "center">
+<h2>{{ user.getName() }}'s feed</h2> <br>
+    {% for post in posts %}
+    {% if post.user_name in friends or post.user_name==user.getName() %}
+<div class="card">
+    <h5 class="card-header" >
+        <div>
+        <div align="left">
+        <a href="/show-{{post.user_name}}">{{post.user_name}} </a>
+        </div>
+        <div align="right">
+            {% if user.getName() in post.likes %}
+            {% set like="unlike" %}
+            {% set handle="delete" %}
+            {% else %}
+            {% set like="like" %}
+            {% set handle="add" %}
+            {% endif %}
+            Likes = {{post.likes | length }}
+            <a href="/{{handle}}-like/{{user.getName()}}/{{post._id}}">
+                {{like}}
+            </a>
+        </div>
+    </div>
+    </h5>
+    <div class="card-body">
+      <p class="card-text">{{post.text}}</p>
+    </div>
+    <h5 class="card-header" > Comments </h5>
+    <div class="card-body">
+        {% if post.comments | length > 0 %}
+
+        <p>
+            <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+              Show comments ({{post.comments | length}})
+            </a>
+          </p>
+          <div class="collapse" id="collapseExample">
+            <div class="card card-body">
+                {% for comm_id in post.comments %}
+                {% set com = comments[comm_id] %}
+                {% if com %}
+                <div class="d-flex justify-content-between align-items-center">
+                    {{com["text"]}}   
+                    {% if com["username"] == user.getName() %}
+                    <a href="/delete-comment/{{comm_id}}/{{post._id}}">
+                    <button class="btn btn-danger">Delete</button>
+                    </a>
+                    {% endif %}
+                    <a href="/show-{{com['username']}}">{{com["username"]}} </a>
+                </div>
+                {% endif %}
+            {% endfor %}
+            </div>
+          </div>
+        {%else %}
+        <font style="color:lightblue"> <h3>No comments</h2> </font>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <form method="POST">
+        <textarea   id="comment" name="comment" placeholder="Add comment" cols="50"></textarea> <br>
+        <input type="hidden" id="hidden" name="hidden" value="{{user.getName()}},{{post._id}}">
+            <button type="submit" class="btn btn-primary">
+            Add
+        </button>
+        </form>
+      </div>
+  </div> <br>
+  {% endif %}
+  {% endfor %}
+</div>
+</div>
+<div class="col-sm-4" align="center">
+<h2>Recommendation </h2>
+{% set ns=namespace(count = 0) %}
+<ul>
+{% for rec in recomm if ns.count<10 %}
+  <li><a href="/show-{{rec[0]}}">{{rec[0]}}</a> ({{rec[1]}} mutual friends)</li>
+  {%set  ns.count = ns.count +  1 %}
+{% endfor %}
+{% if ns.count == 0 %}
+  <i><h3>No friends to recommend</h3></i>
+{% endif %}
+</ul>
+</div>
+</div>
+</div>
+{% endblock %}
