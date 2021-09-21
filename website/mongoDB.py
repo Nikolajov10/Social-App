@@ -12,7 +12,7 @@ class MongoDb:
     @staticmethod
     def initDB():
         if not MongoDb.client:
-            MongoDb.client = MongoClient("mongodb+srv://test:test@cluster0.xnnul.mongodb.net/App?retryWrites=true&w=majority")
+            MongoDb.client = MongoClient("mongodb+srv://<username>:<password>@cluster0.xnnul.mongodb.net/<db_name>?retryWrites=true&w=majority")
         if not MongoDb.db:
             MongoDb.db = MongoDb.client["App"]
         if not MongoDb.collection:
